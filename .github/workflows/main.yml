@@ -1,6 +1,6 @@
 # This is a basic workflow to help you get started with Actions
 
-name: CI
+name: codecrafters.io-testing
 
 # Controls when the action will run. Triggers the workflow on push or pull request
 # events but only for the master branch
@@ -23,7 +23,7 @@ jobs:
           python-version: 3.6
       - name: remove existing git dir
         run: rm -rf .git
-      - name: run git python app
-        run: ./your_git.sh
+      - name: run git init with python git clone
+        run: ./your_git.sh init
       - name: test git dir structure
         run: ./tests/test-dir.sh
