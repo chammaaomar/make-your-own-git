@@ -13,7 +13,7 @@ def main():
             f.write("ref: refs/heads/master\n")
         print("Initialized git directory")
     else:
-        raise RuntimeError(f"Unknown command #{command}")
+        raise RuntimeError(f"Unknown command {command}")
 
 
 if __name__ == "__main__":

@@ -21,7 +21,7 @@ then
     exit 1
 fi
 
-EXPECTED_CAT="ref: refs/heads/master\n"
+EXPECTED_CAT="ref: refs/heads/master"
 CAT="$(cat $HEADF)"
 if [ "$CAT" != "$EXPECTED_CAT" ];
 then
