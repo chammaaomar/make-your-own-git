@@ -25,6 +25,6 @@ EXPECTED_CAT="ref: refs/heads/master\n"
 CAT="$(cat $HEADF)"
 if [ "$CAT" != "$EXPECTED_CAT" ];
 then
-    echo "epected $EXPECTED_CAT \ngot $CAT"
+    echo "expected $EXPECTED_CAT got $CAT"
     exit 1
 fi
