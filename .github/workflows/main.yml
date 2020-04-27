@@ -23,7 +23,7 @@ jobs:
           python-version: 3.6
       - name: remove existing git dir
         run: rm -rf .git
-      - name: run git python app
-        run: ./your_git.sh
+      - name: run git init with python git clone
+        run: ./your_git.sh init
       - name: test git dir structure
         run: ./tests/test-dir.sh
