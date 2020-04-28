@@ -9,7 +9,7 @@ def git_init(base_dir):
     obj_dir = os.path.join(git_dir, "objects")
     ref_dir = os.path.join(git_dir, "refs")
     head_f = os.path.join(git_dir, "HEAD")
-    os.makedirs(base_dir)
+    os.makedirs(base_dir, exist_ok=True)
     os.mkdir(git_dir)
     os.mkdir(ref_dir)
     os.mkdir(obj_dir)
