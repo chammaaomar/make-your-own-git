@@ -27,3 +27,5 @@ jobs:
         run: ./your_git.sh init && ./tests/test-dir.sh
       - name: test git cat-file
         run: ./tests/test-cat.sh
+      - name: test git hash-object
+        run: ./tests/test-hash.sh
