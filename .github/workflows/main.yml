@@ -26,4 +26,4 @@ jobs:
       - name: test git dir structure
         run: ./your_git.sh init && ./tests/test-dir.sh
       - name: test git cat-file
-        run: ./test-cat.sh
+        run: ./tests/test-cat.sh

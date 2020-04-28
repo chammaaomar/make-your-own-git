@@ -28,3 +28,6 @@ then
     echo "expected $EXPECTED_CAT got $CAT"
     exit 1
 fi
+
+
+echo "git init test passing!"
