@@ -28,7 +28,7 @@ def git_cat(base_dir, digest, print_flag):
         with open(blob_path, mode="rb") as blob:
             data = blob.read()
             contents = zlib.decompress(data).split(b"\x00")[1]
-            print(str(contents, encoding="utf-8"))
+            sys.stdout.write(str(contents, encoding="utf-8"))
     except FileNotFoundError:
         print(f"digest doesn't correspond to any git object: {digest}", file=sys.stderr)
         return
