@@ -23,7 +23,7 @@ def cat_file(digest, print_flag):
     try:
         blob_path = os.path.join(obj_dir, digest[:2], digest[2:])
     except IndexError:
-        print(f"invalid sha-256 digest: {digest}", file=sys.stderr)
+        print(f"invalid sha-1 digest: {digest}", file=sys.stderr)
         return
     try:
         with open(blob_path, mode="rb") as blob:
@@ -31,13 +31,13 @@ def cat_file(digest, print_flag):
             header, contents = zlib.decompress(data).split(b"\x00")
             _type, size = header.split(b" ")
             if print_flag == P_FL:
-                print(str(contents, encoding="utf-8"))
+                sys.stdout.write(contents.decode("utf-8"))
                 return
             if print_flag == S_FL:
-                print(str(size, encoding="utf-8"))
+                sys.stdout.write(size.decode("utf-8"))
                 return
             if print_flag == T_FL:
-                print(str(_type, encoding="utf-8"))
+                sys.stdout.write(_type.decode("utf-8"))
                 return
     except FileNotFoundError:
         print(f"digest doesn't correspond to any git object: {digest}", file=sys.stderr)
@@ -49,7 +49,7 @@ def hash_object(file_path, write):
             contents = file.read()
             header = f"blob {len(contents)}\x00"
             hasher = hashlib.sha1()
-            hasher.update(bytes(header, encoding="utf-8"))
+            hasher.update(header.encode("utf-8"))
             hasher.update(contents)
             digest = hasher.hexdigest()
             if write:
@@ -57,10 +57,8 @@ def hash_object(file_path, write):
                 os.makedirs(obj_dir, exist_ok=True)
                 obj_path = os.path.join(obj_dir, digest[2:])
                 with open(obj_path, mode="wb+") as out:
-                    out.write(bytes(header, encoding="utf-8"))
-                    zlib_compressor = zlib.compressobj()
-                    compressed = zlib_compressor.compress(contents)
-                    print(compressed)
-            print(digest)
+                    compressed = zlib.compress(header.encode("utf-8")+contents)
+                    out.write(compressed)
+            sys.stdout.write(digest)
     except FileNotFoundError:
         print(f"invalid file path: {file_path}", file=sys.stderr)
