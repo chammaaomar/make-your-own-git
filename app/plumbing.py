@@ -4,6 +4,7 @@ import zlib
 import hashlib
 
 from app.consts import *
+from app.utils import git_object
 
 def init(base_dir):
     git_dir = os.path.join(base_dir, ".git")
@@ -18,30 +19,21 @@ def init(base_dir):
         f.write("ref: refs/heads/master\n")
     print(f"Initialized empty git repository in {git_dir}")
 
-def cat_file(digest, print_flag):
-    obj_dir = os.path.join('.git', 'objects')
-    try:
-        blob_path = os.path.join(obj_dir, digest[:2], digest[2:])
-    except IndexError:
-        print(f"invalid sha-1 digest: {digest}", file=sys.stderr)
-        return
-    try:
-        with open(blob_path, mode="rb") as blob:
-            data = blob.read()
-            header, contents = zlib.decompress(data).split(b"\x00")
-            _type, size = header.split(b" ")
-            if print_flag == P_FL:
-                sys.stdout.write(contents.decode("utf-8"))
-                return
-            if print_flag == S_FL:
-                sys.stdout.write(size.decode("utf-8"))
-                return
-            if print_flag == T_FL:
-                sys.stdout.write(_type.decode("utf-8"))
-                return
-    except FileNotFoundError:
-        print(f"digest doesn't correspond to any git object: {digest}", file=sys.stderr)
-        return
+@git_object
+def cat_file(obj_path, print_flag):
+    with open(obj_path, mode="rb") as blob:
+        data = blob.read()
+        header, contents = zlib.decompress(data).split(b"\x00")
+        _type, size = header.split(b" ")
+        if print_flag == P_FL:
+            sys.stdout.write(contents.decode("utf-8"))
+            return
+        if print_flag == S_FL:
+            sys.stdout.write(size.decode("utf-8"))
+            return
+        if print_flag == T_FL:
+            sys.stdout.write(_type.decode("utf-8"))
+            return
 
 def hash_object(file_path, write):
     try:
@@ -62,3 +54,8 @@ def hash_object(file_path, write):
             sys.stdout.write(digest)
     except FileNotFoundError:
         print(f"invalid file path: {file_path}", file=sys.stderr)
+
+@git_object
+def ls_tree(tree_path, flags):
+    with open(tree_path, mode='rb') as tree:
+        pass
