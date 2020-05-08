@@ -6,8 +6,7 @@ echo "$(mkdir dir1 dir2)"
 echo "$(touch file1 dir1/file_in_dir_{1,2} dir2/file_in_dir_3)"
 
 echo "$(git add file1 dir1/ dir2/)"
-echo "$(git commit -m \"test\")"
-TREE_HASH="192403f9d8c4872a30e949685d9e5e7f91f06933"
+TREE_HASH="$(git update-index && git write-tree)"
 
 LS_TREE="$(./your_git.sh ls-tree --name-only $TREE_HASH)"
 CORRECT_TREE="$(git ls-tree --name-only $TREE_HASH)"
