@@ -2,7 +2,7 @@
 
 ## codecrafters
 
-Check out the awesome (codecrafters)[https://codecrafters.io].
+Check out the awesome [codecrafters](https://codecrafters.io).
 
 ## Usage
 This solely uses the Python standard library, so there are no dependancies but Python 3.x. To try it out:
