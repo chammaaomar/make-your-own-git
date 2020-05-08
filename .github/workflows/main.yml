@@ -29,3 +29,5 @@ jobs:
         run: ./tests/test-cat.sh
       - name: test git hash-object
         run: ./tests/test-hash.sh
+      - name: test git ls-tree
+        run: ./tests/test-ls-tree.sh
