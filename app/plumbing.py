@@ -96,7 +96,7 @@ def ls_tree(tree_path, *flags):
         content = zlib.decompress(data).split(b"\x00")
         # we want to keep both "tree <tree size in bytes>"
         tokens = [*content[0].split(b" ")]
-        tokens += [item.split(b" ")[1]
+        tokens += [item.split(b" ")[-1]
                    for i, item in enumerate(content) if i > 0 and b" " in item]
         if lsfmt_flag == NAMEONLY_FL:
             name_tokens = [str(t, encoding="utf-8") for t in tokens[2:]]
