@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+echo "testing git init"
+
 BASEDIR="$(pwd)"
 GITDIR="$BASEDIR/.git"
 OBJDIR="$GITDIR/objects"
