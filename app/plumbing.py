@@ -8,6 +8,12 @@ from app.utils import sha_to_path
 
 
 def init(base_dir):
+    """initialize minimal git directory in @base_dir. Currently
+    no support for packing or tags.
+
+    Arguments:
+        base_dir {string} -- path to directory in which to initialize .git
+    """
     git_dir = os.path.join(base_dir, ".git")
     obj_dir = os.path.join(git_dir, "objects")
     ref_dir = os.path.join(git_dir, "refs")
@@ -65,6 +71,7 @@ def ls_tree(tree_path, *flags):
     with open(tree_path, mode="rb") as tree:
         data = tree.read()
         content = zlib.decompress(data).split(b"\x00")
+        # we want to keep both "tree <tree size in bytes>"
         tokens = [*content[0].split(b" ")]
         tokens += [item.split(b" ")[1]
                    for i, item in enumerate(content) if i > 0 and b" " in item]
