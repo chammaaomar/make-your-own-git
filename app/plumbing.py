@@ -58,6 +58,16 @@ def cat_file(obj_path, print_flag):
 
 
 def hash_object(file_path, write):
+    """Produces the content-addressing id at which the object would be stored
+    in the git object database
+
+    Arguments:
+        file_path {string} -- path/to/file whose id you want to produce
+        write {boolean} -- actually store the object in the git object database.
+
+    Right now, only blobs can be hashed, and the output format is the input
+    formatted expected by cat_file, "type <size in bytes>\x00contents"
+    """
     try:
         with open(file_path, mode="rb") as file:
             contents = file.read()
