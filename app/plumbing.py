@@ -4,7 +4,8 @@ import zlib
 import hashlib
 
 from app.consts import *
-from app.utils import git_object
+from app.utils import sha_to_path
+
 
 def init(base_dir):
     git_dir = os.path.join(base_dir, ".git")
@@ -19,7 +20,8 @@ def init(base_dir):
         f.write("ref: refs/heads/master\n")
     print(f"Initialized empty git repository in {git_dir}")
 
-@git_object
+
+@sha_to_path
 def cat_file(obj_path, print_flag):
     with open(obj_path, mode="rb") as blob:
         data = blob.read()
@@ -34,6 +36,7 @@ def cat_file(obj_path, print_flag):
         if print_flag == T_FL:
             sys.stdout.write(_type.decode("utf-8"))
             return
+
 
 def hash_object(file_path, write):
     try:
@@ -55,7 +58,16 @@ def hash_object(file_path, write):
     except FileNotFoundError:
         print(f"invalid file path: {file_path}", file=sys.stderr)
 
-@git_object
-def ls_tree(tree_path, flags):
-    with open(tree_path, mode='rb') as tree:
-        pass
+
+@sha_to_path
+def ls_tree(tree_path, *flags):
+    [lsfmt_flag, recur_flag] = flags
+    with open(tree_path, mode="rb") as tree:
+        data = tree.read()
+        content = zlib.decompress(data).split(b"\x00")
+        tokens = [*content[0].split(b" ")]
+        tokens += [item.split(b" ")[1]
+                   for i, item in enumerate(content) if i > 0 and b" " in item]
+        if lsfmt_flag == NAMEONLY_FL:
+            name_tokens = [str(t, encoding="utf-8") for t in tokens[2:]]
+            print("\n".join(name_tokens))

@@ -74,7 +74,7 @@ def main():
         help="/full/path/to/file"
     )
 
-    # tree-ls command options
+    # ls-tree command options
     lsfmt_group = parser_lstree.add_mutually_exclusive_group()
     lsfmt_group.add_argument(
         "--name-only",
@@ -112,7 +112,7 @@ def main():
         plumbing.cat_file(args.object, args.print_flag)
     elif args.command == "hash-object":
         plumbing.hash_object(args.file, args.write)
-    elif args.command == "tree-ls":
+    elif args.command == "ls-tree":
         plumbing.ls_tree(
             args.tree,
             args.lsfmt_flag,
