@@ -29,6 +29,19 @@ def init(base_dir):
 
 @sha_to_path
 def cat_file(obj_path, print_flag):
+    """Prints the contents of an object encoded / compressed by
+    git hash-object or ./your_git.sh hash-object. It currently expects
+    the contents to be of the form "type <size in bytes>\x00contents".
+    It only works reliably with blob objects right now, but may work
+    with trees.
+
+    Arguments:
+        obj_path {string} -- path to object in git object database
+        print_flag {int} -- 
+            1: print the contents of the object
+            2: print the size in bytes of the object
+            3: print the type of the object, e.g. blob
+    """
     with open(obj_path, mode="rb") as blob:
         data = blob.read()
         header, contents = zlib.decompress(data).split(b"\x00")
