@@ -1,3 +1,4 @@
+![CLI-functional-testing](https://github.com/chammaaomar/make-your-own-git/workflows/CLI-functional-testing/badge.svg)
 # Python Git Clone
 
 ## codecrafters
