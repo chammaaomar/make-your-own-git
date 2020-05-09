@@ -121,8 +121,9 @@ def write_tree(prefix):
     for _dir in dirs:
         if '.git' not in _dir:
             sub_tree = os.path.join(root, _dir)
+            header = f"4000 {_dir}\0{write_tree(sub_tree)}"
             content.append(
-                f"4000 {_dir}\0{write_tree(sub_tree)}")
+                header.encode("utf-8"))
     for fname in files:
         fpath = os.path.join(root, fname)
         oct_perm = oct(os.stat(fpath).st_mode)[2:]
