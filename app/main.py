@@ -77,9 +77,18 @@ def main():
         action="store_true",
         help="actually write the object into .git/objects"
     )
-    parser_hash.add_argument(
+    input_group = parser_hash.add_mutually_exclusive_group(required=True)
+
+    input_group.add_argument(
         "file",
-        help="/full/path/to/file"
+        nargs="?",
+        default="",
+        help="file to read from. Cannot be used with --stdin"
+    )
+    input_group.add_argument(
+        '--stdin',
+        action='store_true',
+        help="read from standard input. Cannot be used with 'file'"
     )
 
     # ls-tree command options

@@ -73,26 +73,32 @@ def hash_object(file_path, write, _type="blob", quiet=False):
     Returns:
         [string] -- 40-character sha-1 digest
     """
-    try:
-        with open(file_path, mode="rb") as file:
-            contents = file.read()
-            header = f"{_type} {len(contents)}\x00"
-            hasher = hashlib.sha1()
-            hasher.update(header.encode("utf-8"))
-            hasher.update(contents)
-            digest = hasher.hexdigest()
-            if write:
-                obj_dir = os.path.join('.git', 'objects', digest[:2])
-                os.makedirs(obj_dir, exist_ok=True)
-                obj_path = os.path.join(obj_dir, digest[2:])
-                with open(obj_path, mode="wb+") as out:
-                    compressed = zlib.compress(header.encode("utf-8")+contents)
-                    out.write(compressed)
-            if not quiet:
-                sys.stdout.write(digest)
-            return digest
-    except FileNotFoundError:
-        print(f"invalid file path: {file_path}", file=sys.stderr)
+    if file_path:
+        try:
+            input = open(file_path, mode="rb")
+        except FileNotFoundError:
+            print(f"invalid file path: {file_path}", file=sys.stderr)
+            return
+    else:
+        # buffer to read binary IO, otherwise sys.stdin gives
+        # text IO
+        input = sys.stdin.buffer
+    contents = input.read()
+    header = f"{_type} {len(contents)}\x00"
+    hasher = hashlib.sha1()
+    hasher.update(header.encode("utf-8"))
+    hasher.update(contents)
+    digest = hasher.hexdigest()
+    if write:
+        obj_dir = os.path.join('.git', 'objects', digest[:2])
+        os.makedirs(obj_dir, exist_ok=True)
+        obj_path = os.path.join(obj_dir, digest[2:])
+        with open(obj_path, mode="wb+") as out:
+            compressed = zlib.compress(header.encode("utf-8")+contents)
+            out.write(compressed)
+    if not quiet:
+        sys.stdout.write(digest)
+    return digest
 
 
 @sha_to_path
