@@ -1,7 +1,9 @@
+import binascii
 import os
 import sys
 import zlib
 import hashlib
+
 
 from app.consts import *
 from app.utils import sha_to_path
@@ -37,7 +39,7 @@ def cat_file(obj_path, print_flag):
 
     Arguments:
         obj_path {string} -- path to object in git object database
-        print_flag {int} -- 
+        print_flag {int} --
             1: print the contents of the object
             2: print the size in bytes of the object
             3: print the type of the object, e.g. blob
@@ -57,7 +59,7 @@ def cat_file(obj_path, print_flag):
             return
 
 
-def hash_object(file_path, write):
+def hash_object(file_path, write, _type="blob", quiet=False):
     """Produces the content-addressing id at which the object would be stored
     in the git object database
 
@@ -67,11 +69,14 @@ def hash_object(file_path, write):
 
     Right now, only blobs can be hashed, and the output format is the input
     formatted expected by cat_file, "type <size in bytes>\x00contents"
+
+    Returns:
+        [string] -- 40-character sha-1 digest
     """
     try:
         with open(file_path, mode="rb") as file:
             contents = file.read()
-            header = f"blob {len(contents)}\x00"
+            header = f"{_type} {len(contents)}\x00"
             hasher = hashlib.sha1()
             hasher.update(header.encode("utf-8"))
             hasher.update(contents)
@@ -83,7 +88,9 @@ def hash_object(file_path, write):
                 with open(obj_path, mode="wb+") as out:
                     compressed = zlib.compress(header.encode("utf-8")+contents)
                     out.write(compressed)
-            sys.stdout.write(digest)
+            if not quiet:
+                sys.stdout.write(digest)
+            return digest
     except FileNotFoundError:
         print(f"invalid file path: {file_path}", file=sys.stderr)
 
@@ -101,3 +108,33 @@ def ls_tree(tree_path, *flags):
         if lsfmt_flag == NAMEONLY_FL:
             name_tokens = [str(t, encoding="utf-8") for t in tokens[2:]]
             print("\n".join(name_tokens))
+        else:
+            raise NotImplementedError(
+                'Only --name-only flag is currently supported')
+
+
+def write_tree(prefix):
+    content = []
+    root, dirs, files = next(os.walk(prefix))
+    if '.git' in root:
+        return
+    for _dir in dirs:
+        if '.git' not in _dir:
+            sub_tree = os.path.join(root, _dir)
+            content.append(
+                f"4000 {_dir}\0{write_tree(sub_tree)}")
+    for fname in files:
+        fpath = os.path.join(root, fname)
+        breakpoint()
+        oct_perm = oct(os.stat(fpath).st_mode)[2:]
+        header = f"{oct_perm} {fname}\0"
+        sha1_bin = binascii.a2b_hex(hash_object(
+            fpath, write=True, _type='blob', quiet=True))
+        content.append(header.encode("utf-8") + sha1_bin)
+    content.sort(key=lambda line: line.split(b" ")[1].split(b"\0")[0])
+    content_bytes = b"".join(content)
+    with open('tmp', mode='wb+') as tmp:
+        tmp.write(content_bytes)
+    digest = hash_object('tmp', write=True, _type="tree", quiet=True)
+    os.remove('tmp')
+    return digest

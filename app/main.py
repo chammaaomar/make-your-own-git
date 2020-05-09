@@ -1,6 +1,6 @@
 import argparse
 
-import app.plumbing as plumbing 
+import app.plumbing as plumbing
 from app.consts import *
 
 
@@ -23,11 +23,19 @@ def main():
         help=(
             "write to stdout the content-addressing id (sha-1 digest) "
             "that would be used to store the object in the git object database"
-            )
+        )
     )
     parser_lstree = sub_parsers.add_parser(
         "ls-tree",
         help="list the contents of a tree object"
+    )
+    parser_writetree = sub_parsers.add_parser(
+        "write-tree",
+        help=(
+            "write directory to a tree object and return 40-character"
+            " SHA-1 digest. Assumes all directories and files in working"
+            " area are tracked, i.e. staging area == working area"
+        )
     )
 
     # init command options
@@ -61,7 +69,7 @@ def main():
         "object",
         type=str,
         help="sha-1 digest of object")
-    
+
     # hash-object command options
     parser_hash.add_argument(
         "-w",
@@ -102,6 +110,11 @@ def main():
         help="content-addressing id (sha-1 digest) of tree"
     )
 
+    # write-tree
+    parser_writetree.add_argument(
+        "-p", "--prefix", default='.',
+        help="write tree object for a subdirectory")
+
     args = parser.parse_args()
 
     # dispatching calls
@@ -118,6 +131,10 @@ def main():
             args.lsfmt_flag,
             args.recursive
         )
+    elif args.command == "write-tree":
+        tree_hash = plumbing.write_tree(args.prefix)
+        print(tree_hash)
+
 
 if __name__ == "__main__":
     main()
