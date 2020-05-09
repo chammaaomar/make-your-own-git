@@ -125,7 +125,6 @@ def write_tree(prefix):
                 f"4000 {_dir}\0{write_tree(sub_tree)}")
     for fname in files:
         fpath = os.path.join(root, fname)
-        breakpoint()
         oct_perm = oct(os.stat(fpath).st_mode)[2:]
         header = f"{oct_perm} {fname}\0"
         sha1_bin = binascii.a2b_hex(hash_object(
