@@ -18,5 +18,5 @@ will display the commands that have been implemented thus far with (hopefully) h
 - `init`
 - `cat-file`. Currently only works with blob objects.
 - `hash-object`. Currently only works with blob objects.
-
-Currently adding support for trees.
+- `ls-tree`. Currently only works with the `--name-only` option.
+- `write-tree`
