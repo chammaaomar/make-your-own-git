@@ -108,10 +108,11 @@ def ls_tree(data, *flags):
 def write_tree(prefix):
     content = []
     root, dirs, files = next(os.walk(prefix))
-    if '.git' in root:
+    if '.git' in root or '__pycache__' in root:
         return
     for _dir in dirs:
-        if '.git' not in _dir:
+        if '.git' not in _dir and '__pycache__' not in _dir:
+            # TODO: implement a .gitignore
             sub_tree = os.path.join(root, _dir)
             sha1_bin = binascii.a2b_hex(write_tree(sub_tree))
             header = f"40000 {_dir}\0"
