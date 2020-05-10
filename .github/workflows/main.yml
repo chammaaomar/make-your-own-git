@@ -32,4 +32,4 @@ jobs:
       - name: test git ls-tree
         run: ./tests/test-ls-tree.sh
       - name: test git write-tree
-        run: ./test/test-write-tree.sh
+        run: ./tests/test-write-tree.sh
