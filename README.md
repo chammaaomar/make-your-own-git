@@ -13,10 +13,26 @@ cd make-your-own-git
 ./your_git.sh -h
 ```
 
-will display the commands that have been implemented thus far with (hopefully) helpful usage messages. The commands are
+will display the commands that have been implemented thus far with (hopefully) helpful usage messages. The main commands are
 
 - `init`
 - `cat-file`. Currently only works with blob objects.
 - `hash-object`. Currently only works with blob objects.
 - `ls-tree`. Currently only works with the `--name-only` option.
 - `write-tree`
+
+You can use `./your_git cmd -h`, where `cmd` is one of the above, for command-specific help, e.g.
+
+```
+>>> ./your_git cat-file -h
+>>> usage: your_git.sh cat-file [-h] (-p | -t | -s) object
+
+positional arguments:
+  object      sha-1 digest of object
+
+optional arguments:
+  -h, --help  show this help message and exit
+  -p          pretty-print object's content
+  -t          print the object's type
+  -s          print the object's size
+```
