@@ -10,8 +10,8 @@ echo "$(mkdir -p dir/another)"
 echo "$(touch dir/file{1,2} dir/another/file3)"
 
 
-TREE_HASH="$(./your_git.sh write-tree --prefix dir)"
-CORRECT_HASH="$(git add dir && git write-tree)"
+TREE_HASH="$(./your_git.sh write-tree)"
+CORRECT_HASH="$(git add . && git write-tree)"
 
 # clean up
 echo "$(rm -rf dir)"
