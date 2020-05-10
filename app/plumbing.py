@@ -50,14 +50,11 @@ def cat_file(data, print_flag):
     if _type == b'tree':
         contents = format_tree(contents)
     if print_flag == P_FL:
-        sys.stdout.write(contents.decode("utf-8"))
-        return
+        return contents.decode("utf-8")
     if print_flag == S_FL:
-        sys.stdout.write(size.decode("utf-8"))
-        return
+        return size.decode("utf-8")
     if print_flag == T_FL:
-        sys.stdout.write(_type.decode("utf-8"))
-        return
+        return _type.decode("utf-8")
 
 
 def hash_object(contents, write, _type="blob"):
@@ -97,12 +94,15 @@ def ls_tree(data, *flags):
     tokens = [*content[0].split(b" ")]
     tokens += [item.split(b" ")[-1]
                for i, item in enumerate(content) if i > 0 and b" " in item]
+    if recur_flag:
+        print("--recursive flag not yet supported", file=sys.stderr)
+        return None
     if lsfmt_flag == NAMEONLY_FL:
         name_tokens = [str(t, encoding="utf-8") for t in tokens[2:]]
-        print("\n".join(name_tokens))
+        return "\n".join(name_tokens)
     else:
-        raise NotImplementedError(
-            'Only --name-only flag is currently supported')
+        print("Only --name-only flag is currently supported", file=sys.stderr)
+        return None
 
 
 def write_tree(prefix):

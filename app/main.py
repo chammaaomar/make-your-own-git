@@ -132,7 +132,9 @@ def main():
     if args.command == "init":
         plumbing.init(args.dir)
     elif args.command == "cat-file":
-        plumbing.cat_file(args.object, args.print_flag)
+        cat = plumbing.cat_file(args.object, args.print_flag)
+        if cat:
+            print(cat)
     elif args.command == "hash-object":
         if args.stdin:
             contents = sys.stdin.buffer.read()
@@ -142,11 +144,13 @@ def main():
         hash = plumbing.hash_object(contents, args.write)
         print(hash)
     elif args.command == "ls-tree":
-        plumbing.ls_tree(
+        ls_tree = plumbing.ls_tree(
             args.tree,
             args.lsfmt_flag,
             args.recursive
         )
+        if ls_tree:
+            print(ls_tree)
     elif args.command == "write-tree":
         tree_hash = plumbing.write_tree(args.prefix)
         print(tree_hash)

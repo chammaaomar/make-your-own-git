@@ -6,8 +6,7 @@ import functools
 
 def sha_to_path(func):
     """A decorator that turns the sha-1 argument of a plumbing command into
-    a filepath, calls func with the contents from the file and handles errors
-    from an invalid sha-1 if non-existant file or sha-1 too short.
+    a filepath, and calls func with the contents from the file
 
     Arguments:
         func {None function(string, *args)} -- A git plumbing function which
@@ -15,8 +14,14 @@ def sha_to_path(func):
         of flags and returns None
 
     Returns:
-        {None} func(digest) -- A wrapper function whose action is side-effect
-            only: writing to stdout or a file.
+        {string, None} func(digest) -- A wrapper function whose return value
+        is a string, or None if an error is encountered
+
+    Handles:
+        IndexError: if sha-1 digest is too short
+        FileNotFoundError: if the sha-1 digest doesn't correspond to an
+            object in the git object database '.git/objects'
+        It these handles by printing to sys.stderr
     """
 
     # use functools to maintain the identity
@@ -32,7 +37,7 @@ def sha_to_path(func):
         try:
             with open(file_path, mode="rb") as file:
                 data = file.read()
-                func(data, *flags)
+                return func(data, *flags)
         except FileNotFoundError:
             print(f"digest doesn't correspond to any git object: {digest}",
                   file=sys.stderr)
