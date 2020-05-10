@@ -1,9 +1,8 @@
 import binascii
+import hashlib
 import os
 import sys
 import zlib
-import hashlib
-
 
 from app.consts import *
 from app.utils import sha_to_path
@@ -30,7 +29,7 @@ def init(base_dir):
 
 
 @sha_to_path
-def cat_file(obj_path, print_flag):
+def cat_file(data, print_flag):
     """Prints the contents of an object encoded / compressed by
     git hash-object or ./your_git.sh hash-object. It currently expects
     the contents to be of the form "type <size in bytes>\x00contents".
@@ -44,46 +43,33 @@ def cat_file(obj_path, print_flag):
             2: print the size in bytes of the object
             3: print the type of the object, e.g. blob
     """
-    with open(obj_path, mode="rb") as blob:
-        data = blob.read()
-        header, contents = zlib.decompress(data).split(b"\x00")
-        _type, size = header.split(b" ")
-        if print_flag == P_FL:
-            sys.stdout.write(contents.decode("utf-8"))
-            return
-        if print_flag == S_FL:
-            sys.stdout.write(size.decode("utf-8"))
-            return
-        if print_flag == T_FL:
-            sys.stdout.write(_type.decode("utf-8"))
-            return
+    header, contents = zlib.decompress(data).split(b"\x00")
+    _type, size = header.split(b" ")
+    if print_flag == P_FL:
+        sys.stdout.write(contents.decode("utf-8"))
+        return
+    if print_flag == S_FL:
+        sys.stdout.write(size.decode("utf-8"))
+        return
+    if print_flag == T_FL:
+        sys.stdout.write(_type.decode("utf-8"))
+        return
 
 
-def hash_object(file_path, write, _type="blob", quiet=False):
+def hash_object(contents, write, _type="blob"):
     """Produces the content-addressing id at which the object would be stored
     in the git object database
 
     Arguments:
-        file_path {string} -- path/to/file whose id you want to produce
+        contents {bytes} -- File contents as bytes array or bytes string
         write {boolean} -- actually store the object in the git object database.
 
-    Right now, only blobs can be hashed, and the output format is the input
-    formatted expected by cat_file, "type <size in bytes>\x00contents"
+    The output format is the input formatted expected by git cat-file,
+    "type <size in bytes>\x00contents"
 
     Returns:
-        [string] -- 40-character sha-1 digest
+        {[string], 0} -- 40-character sha-1 digest
     """
-    if file_path:
-        try:
-            input = open(file_path, mode="rb")
-        except FileNotFoundError:
-            print(f"invalid file path: {file_path}", file=sys.stderr)
-            return
-    else:
-        # buffer to read binary IO, otherwise sys.stdin gives
-        # text IO
-        input = sys.stdin.buffer
-    contents = input.read()
     header = f"{_type} {len(contents)}\x00"
     hasher = hashlib.sha1()
     hasher.update(header.encode("utf-8"))
@@ -96,27 +82,23 @@ def hash_object(file_path, write, _type="blob", quiet=False):
         with open(obj_path, mode="wb+") as out:
             compressed = zlib.compress(header.encode("utf-8")+contents)
             out.write(compressed)
-    if not quiet:
-        sys.stdout.write(digest)
     return digest
 
 
 @sha_to_path
-def ls_tree(tree_path, *flags):
+def ls_tree(data, *flags):
     [lsfmt_flag, recur_flag] = flags
-    with open(tree_path, mode="rb") as tree:
-        data = tree.read()
-        content = zlib.decompress(data).split(b"\x00")
-        # we want to keep both "tree <tree size in bytes>"
-        tokens = [*content[0].split(b" ")]
-        tokens += [item.split(b" ")[-1]
-                   for i, item in enumerate(content) if i > 0 and b" " in item]
-        if lsfmt_flag == NAMEONLY_FL:
-            name_tokens = [str(t, encoding="utf-8") for t in tokens[2:]]
-            print("\n".join(name_tokens))
-        else:
-            raise NotImplementedError(
-                'Only --name-only flag is currently supported')
+    content = zlib.decompress(data).split(b"\x00")
+    # we want to keep both "tree <tree size in bytes>"
+    tokens = [*content[0].split(b" ")]
+    tokens += [item.split(b" ")[-1]
+               for i, item in enumerate(content) if i > 0 and b" " in item]
+    if lsfmt_flag == NAMEONLY_FL:
+        name_tokens = [str(t, encoding="utf-8") for t in tokens[2:]]
+        print("\n".join(name_tokens))
+    else:
+        raise NotImplementedError(
+            'Only --name-only flag is currently supported')
 
 
 def write_tree(prefix):
@@ -134,13 +116,15 @@ def write_tree(prefix):
         fpath = os.path.join(root, fname)
         oct_perm = oct(os.stat(fpath).st_mode)[2:]
         header = f"{oct_perm} {fname}\0"
-        sha1_bin = binascii.a2b_hex(hash_object(
-            fpath, write=True, _type='blob', quiet=True))
+        with open(fpath, mode="rb") as file:
+            file_bytes = file.read()
+            sha1_bin = binascii.a2b_hex(hash_object(
+                file_bytes, write=True, _type='blob'))
         content.append(header.encode("utf-8") + sha1_bin)
+
     content.sort(key=lambda line: line.split(b" ")[1].split(b"\0")[0])
     content_bytes = b"".join(content)
-    with open('tmp', mode='wb+') as tmp:
-        tmp.write(content_bytes)
-    digest = hash_object('tmp', write=True, _type="tree", quiet=True)
-    os.remove('tmp')
+    digest = hash_object(content_bytes, True, "tree")
+
+    # SHA-1 is 20 bytes
     return digest

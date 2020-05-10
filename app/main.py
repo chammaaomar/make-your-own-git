@@ -1,4 +1,5 @@
 import argparse
+import sys
 
 import app.plumbing as plumbing
 from app.consts import *
@@ -133,7 +134,13 @@ def main():
     elif args.command == "cat-file":
         plumbing.cat_file(args.object, args.print_flag)
     elif args.command == "hash-object":
-        plumbing.hash_object(args.file, args.write)
+        if args.stdin:
+            contents = sys.stdin.buffer.read()
+        else:
+            with open(args.file, mode="rb") as f:
+                contents = f.read()
+        hash = plumbing.hash_object(contents, args.write)
+        print(hash)
     elif args.command == "ls-tree":
         plumbing.ls_tree(
             args.tree,
