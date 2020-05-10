@@ -16,9 +16,9 @@ cd make-your-own-git
 will display the commands that have been implemented thus far with (hopefully) helpful usage messages. The main commands are
 
 - `init`
-- `cat-file`. Currently only works with blob objects.
-- `hash-object`. Currently only works with blob objects.
-- `ls-tree`. Currently only works with the `--name-only` option.
+- `cat-file`: Works with trees and blobs
+- `hash-object`
+- `ls-tree`: Currently only works with the `--name-only` option
 - `write-tree`
 
 You can use `./your_git cmd -h`, where `cmd` is one of the above, for command-specific help, e.g.
