@@ -5,7 +5,7 @@ import sys
 import zlib
 
 from app.consts import *
-from app.utils import sha_to_path
+from app.utils import sha_to_path, format_tree
 
 
 def init(base_dir):
@@ -43,8 +43,12 @@ def cat_file(data, print_flag):
             2: print the size in bytes of the object
             3: print the type of the object, e.g. blob
     """
-    header, contents = zlib.decompress(data).split(b"\x00")
+    decompressed = zlib.decompress(data)
+    delimiter = decompressed.index(b"\x00")
+    header, contents = decompressed[:delimiter], decompressed[delimiter+1:]
     _type, size = header.split(b" ")
+    if _type == b'tree':
+        contents = format_tree(contents)
     if print_flag == P_FL:
         sys.stdout.write(contents.decode("utf-8"))
         return

@@ -1,3 +1,4 @@
+import binascii
 import os
 import sys
 import functools
@@ -38,3 +39,26 @@ def sha_to_path(func):
             return
 
     return wrapper
+
+
+def format_tree(contents):
+    # so we can mutate it in-place
+    contents = bytearray(contents)
+    for i, char in enumerate(contents):
+        if char == 0:
+            # followed by 20-char SHA-1
+            contents[i] = ord(" ")
+            contents[i+1:i+21] = binascii.b2a_hex(contents[i+1:i+21])
+            contents.insert(i + 41, ord('\n'))
+    formatted = []
+    for line in contents.split(b"\n"):
+        if not line:
+            continue
+        perm, name, digest = line.split(b" ")
+        if perm == b"40000":
+            _type = b"tree"
+        else:
+            _type = b"blob"
+        # e.g. 100644 blob <digest>    plumbing.py
+        formatted.append(perm + b" " + _type + b" " + digest + b"    " + name)
+    return b"\n".join(formatted)
