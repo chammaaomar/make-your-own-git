@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-echo "testing gut cat-file"
+echo "testing git cat-file"
 
 phrase="This is a test"
 digest="$(echo $phrase | git hash-object --stdin -w)"

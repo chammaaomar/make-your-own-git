@@ -2,8 +2,13 @@
 
 echo "testing git write-tree"
 
+# make sure state is clean
+echo "$(rm -rf .git)"
+echo "$(./your_git.sh init)"
+
 echo "$(mkdir -p dir/another)"
 echo "$(touch dir/file{1,2} dir/another/file3)"
+
 
 TREE_HASH="$(./your_git.sh write-tree)"
 CORRECT_HASH="$(git add . && git write-tree)"
