@@ -16,9 +16,9 @@ cd make-your-own-git
 will display the commands that have been implemented thus far with (hopefully) helpful usage messages. The main commands are
 
 - `init`
-- `cat-file`: Works with trees and blobs
+- `cat-file`: Works with trees and blobs. Currently requires the full 40-char SHA-1.
 - `hash-object`
-- `ls-tree`: Currently only works with the `--name-only` option
+- `ls-tree`: Currently only works with the `--name-only` option, and requires the full 40-char SHA-1.
 - `write-tree`
 
 You can use `./your_git cmd -h`, where `cmd` is one of the above, for command-specific help, e.g.
