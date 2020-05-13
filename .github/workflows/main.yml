@@ -6,6 +6,8 @@ name: CLI-functional-testing
 # events but only for the master branch
 on:
   push:
+    paths-ignore: 
+      - README.md
     branches: [ master ]
   pull_request:
     branches: [ master ]
