@@ -1,4 +1,5 @@
 import argparse
+import os
 import sys
 
 import app.plumbing as plumbing
@@ -38,12 +39,16 @@ def main():
             " area are tracked, i.e. staging area == working area"
         )
     )
+    parser_committree = sub_parsers.add_parser(
+        "commit-tree",
+        help="Create a commit object from a tree and a parent commit"
+    )
 
     # init command options
     parser_init.add_argument(
         "-d",
         "--dir",
-        default=".",
+        default='.',
         help="dir in which to initialize git. Default: .")
 
     # cat-file command options
@@ -67,9 +72,9 @@ def main():
         dest='print_flag',
         help="print the object's size")
     parser_cat.add_argument(
-        "object",
+        "object_digest",
         type=str,
-        help="sha-1 digest of object")
+        help="40-character sha1 digest of the object to cat")
 
     # hash-object command options
     parser_hash.add_argument(
@@ -116,14 +121,31 @@ def main():
         help="recursively list objects in subtrees"
     )
     parser_lstree.add_argument(
-        "tree",
-        help="content-addressing id (sha-1 digest) of tree"
+        "lstree_digest",
+        help="40-character sha1 digest of the tree to list"
     )
 
     # write-tree
     parser_writetree.add_argument(
         "-p", "--prefix", default='.',
         help="write tree object for a subdirectory")
+
+    # commit-tree
+    parser_committree.add_argument(
+        "committree_digest",
+        help="40-character sha1 digest of the tree to commit."
+    )
+    parser_committree.add_argument(
+        "--parent",
+        "-p",
+        help="40-character sha1 digest of the parent commit, if any."
+    )
+    parser_committree.add_argument(
+        "--message",
+        "-m",
+        required=True,
+        help="required commit message."
+    )
 
     args = parser.parse_args()
 
@@ -132,7 +154,7 @@ def main():
     if args.command == "init":
         plumbing.init(args.dir)
     elif args.command == "cat-file":
-        cat = plumbing.cat_file(args.object, args.print_flag)
+        cat = plumbing.cat_file(args.object_digest, args.print_flag)
         if cat:
             print(cat)
     elif args.command == "hash-object":
@@ -145,7 +167,7 @@ def main():
         print(hash)
     elif args.command == "ls-tree":
         ls_tree = plumbing.ls_tree(
-            args.tree,
+            args.lstree_digest,
             args.lsfmt_flag,
             args.recursive
         )
@@ -154,6 +176,10 @@ def main():
     elif args.command == "write-tree":
         tree_hash = plumbing.write_tree(args.prefix)
         print(tree_hash)
+    elif args.command == "commit-tree":
+        commit_hash = plumbing.commit_tree(
+            args.committree_digest, args.message, args.parent)
+        print(commit_hash)
 
 
 if __name__ == "__main__":

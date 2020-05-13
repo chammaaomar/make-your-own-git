@@ -1,4 +1,5 @@
 import binascii
+import time
 import hashlib
 import os
 import sys
@@ -140,4 +141,47 @@ def write_tree(prefix):
     digest = hash_object(content_bytes, True, "tree")
 
     # SHA-1 is 20 bytes
+    return digest
+
+
+def commit_tree(tree_digest, message, parent_commit=None):
+    commit_contents = []
+    info = {
+        "author": (os.environ.get("AUTHOR_NAME", default="John Doe"),
+                   os.environ.get("AUTHOR_EMAIL", default="john.doe@email.com")),
+        "commiter": (os.environ.get("COMMITER_NAME", default="John Doe"),
+                     os.environ.get("AUTHOR_EMAIL", default="john.doe@email.com"))
+    }
+    commit_time = int(time.time())
+    # gives difference from UTC in hours, accounting for daylight saving
+    utc_diff = time.timezone if not time.localtime().tm_isdst else time.altzone
+    # in minutes. The minus sign is to produce the correct value
+    utc_diff /= (-60 * 60)
+    utc_diff *= 100
+    parent_content = f"parent {parent_commit}\n" if parent_commit else ""
+    commit_contents = [
+        f"tree {tree_digest}\n",
+        parent_content,
+        f"author {info['author'][0]} <{info['author'][1]}> {commit_time} -0400\n",
+        f"committer {info['commiter'][0]} <{info['commiter'][1]}> {commit_time} -0400\n",
+        f"\n{message}"
+    ]
+    commit_str = "".join(commit_contents)
+    commit_bytes = commit_str.encode("utf-8")
+    header = f"commit {len(commit_str)}\x00"
+    header_bytes = header.encode("utf-8")
+    compressed = zlib.compress(header_bytes + commit_bytes)
+
+    # produce sha-1 digest of commit
+    hasher = hashlib.sha1()
+    hasher.update(header_bytes)
+    hasher.update(commit_bytes)
+    digest = hasher.hexdigest()
+
+    # write to file
+    obj_dir = os.path.join('.git', 'objects')
+    file_path = os.path.join(obj_dir, digest[:2], digest[2:])
+    os.makedirs(os.path.dirname(file_path), exist_ok=True)
+    with open(file_path, mode="wb+") as commit:
+        commit.write(compressed)
     return digest
