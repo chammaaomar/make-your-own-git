@@ -20,6 +20,7 @@ will display the commands that have been implemented thus far with (hopefully) h
 - `hash-object`
 - `ls-tree`: Currently only works with the `--name-only` option, and requires the full 40-char SHA-1.
 - `write-tree`
+- `commit-tree`
 
 You can use `./your_git cmd -h`, where `cmd` is one of the above, for command-specific help, e.g.
 
@@ -36,4 +37,3 @@ optional arguments:
   -t          print the object's type
   -s          print the object's size
 ```
-
